@@ -1,7 +1,12 @@
 
 import Client from "./Client";
-
+import SpawnedNode from "./SpawnedNode";
+import SpawnedDocker from "./SpawnedDocker";
+import Spawned from "./Spawned";
 
 export {
-    Client
+    Client,
+    Spawned,
+    SpawnedNode,
+    SpawnedDocker
 };

@@ -3,47 +3,36 @@ import io from "socket.io-client";
 import DockerOptions from "./types/DockerOptions";
 import NodeOptions from "./types/NodeOptions";
 import { Readable } from "stream";
+import Spawned from "./Spawned";
+import SpawnedNode from "./SpawnedNode";
+import SpawnedDocker from "./SpawnedDocker";
+import streamToBuffer from "./streamToBuffer";
 
 class Client {
     private socket : SocketIOClient.Socket;
-    private requestId : 0;
-    private requestStreams : Readable[] = [];
-    connect(addr : string) {
+    private spawnId = 0;
+    async connect(addr : string) {
         const socket = io.connect(addr);
-
-        socket.on("request_data", (requestId : number, data : any) => {
-            const stream = this.requestStreams[requestId];
-            stream.push(data);
-        });
-        
-        socket.on("request_end", (requestId : number) => {
-            const stream = this.requestStreams[requestId];
-            stream.push(null);
-        });
-
         this.socket = socket;
+        await new Promise(solve => {
+            socket.once("connect", solve);
+        });
     }
-    runNode(nodeOptions : NodeOptions) {
-        const stream = new Readable();
-        this.requestStreams.push(stream);
-
-        const requestId = this.requestId;
-        this.requestId++;
-
-        this.socket.emit("runNode", requestId, nodeOptions);
-
-        return stream;
+    async execNode(nodeOptions : NodeOptions, command : string) {
+        const spawnedNode = this.spawnNode(nodeOptions);
+        spawnedNode.exec(command);
+        return await streamToBuffer(spawnedNode);
     }
-    runDocker(dockerOptions : DockerOptions) {
-        const stream = new Readable();
-        this.requestStreams.push(stream);
-
-        const requestId = this.requestId;
-        this.requestId++;
-
-        this.socket.emit("runNode", requestId, dockerOptions);
-
-        return stream;
+    async execDocker(dockerOptions : DockerOptions, command : string) {
+        const spawnedDocker = this.spawnDocker(dockerOptions);
+        spawnedDocker.exec(command);
+        return await streamToBuffer(spawnedDocker);
+    }
+    spawnNode(nodeOptions : NodeOptions) {
+        return new SpawnedNode(this.spawnId++, this.socket, nodeOptions);
+    }
+    spawnDocker(dockerOptions : DockerOptions) {
+        return new SpawnedDocker(this.spawnId++, this.socket, dockerOptions);
     }
 }
 
