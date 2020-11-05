@@ -602,8 +602,8 @@ Readable.prototype.unpipe = function(dest) {
 
 // set up data events if they are asked for
 // Ensure readable listeners eventually get something
-Readable.prototype.on = function(ev, fn) {
-  var res = Stream.prototype.on.call(this, ev, fn);
+Readable.prototype.addListener = function(ev, fn) {
+  var res = Stream.prototype.addListener.call(this, ev, fn);
 
   // If listening to data, and it has not explicitly been paused,
   // then call resume to start the flow of data on the next tick.
@@ -631,21 +631,20 @@ Readable.prototype.on = function(ev, fn) {
 
   return res;
 };
-Readable.prototype.addListener = Readable.prototype.on;
 
 // pause() and resume() are remnants of the legacy readable stream API
 // If the user uses them, then switch into old mode.
 Readable.prototype.resume = function() {
   var state = this._readableState;
-  if (!state.flowing) {
-    debug('resume');
-    state.flowing = true;
-    if (!state.reading) {
-      debug('resume read 0');
-      this.read(0);
-    }
-    resume(this, state);
-  }
+  // if (!state.flowing) {
+  //   debug('resume');
+  //   state.flowing = true;
+  //   if (!state.reading) {
+  //     debug('resume read 0');
+  //     this.read(0);
+  //   }
+  //   resume(this, state);
+  // }
   return this;
 };
 
