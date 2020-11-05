@@ -16,11 +16,11 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js' ],
   },
   output: {
-    libraryTarget: "commonjs",
+    libraryTarget: 'commonjs',
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
   },
   externals: [
-    nodeExternals()
+    // nodeExternals()
   ]
 };

@@ -1,10 +1,10 @@
-import { Readable } from "stream";
 
+import { Buffer } from "buffer";
 
-function streamToBuffer(stream : Readable) {
+function streamToBuffer(stream : any) {
     return new Promise<Buffer>(solve => {
         const result : Array<any> = [];
-        stream.on("data", data => {
+        stream.on("data", (data : any) => {
             result.push(data);
         });
         stream.on("end", () => {
