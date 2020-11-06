@@ -39,17 +39,30 @@ class Spawned extends Readable {
             this.emit("error", err);
         });
     }
+    async waitStart() {
+        return new Promise(solve => {
+                this.socket.once("spawn_start", ({status, err} : {status : any, err : any}) => {
+                if(status !== 200)
+                    throw err;
+                else
+                    solve();
+            })
+        });
+    }
     message(message : any) {
         this.socket.emit("spawn_message", {
-            jwt: this.token,
+            jwt: "jwt " + this.token,
             message
         });
     }
     exec(command : string) {
         this.socket.emit("spawn_exec", {
-            jwt: this.token,
+            jwt: "jwt " + this.token,
             command
         });
+    }
+    execF(f : Function) {
+        this.exec(`(${f.toString()})()`);
     }
     read(size? : number) {
         return;

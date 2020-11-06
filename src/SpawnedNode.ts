@@ -6,7 +6,7 @@ class SpawnedNode extends Spawned {
     constructor(socket : SocketIOClient.Socket, token : string, nodeOptions : NodeOptions) {
         super(socket, token);
         this.socket.emit("spawnNode", {
-            jwt: token,
+            jwt: "jwt " + token,
             ...nodeOptions
         });
     }
