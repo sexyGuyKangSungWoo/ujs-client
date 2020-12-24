@@ -1,5 +1,4 @@
 
-import { Readable } from "./stream";
 import EventEmitter from "wolfy87-eventemitter";
 
 declare interface Spawned extends EventEmitter {
@@ -7,16 +6,18 @@ declare interface Spawned extends EventEmitter {
     emit(event: "start", data: any): this;
     emit(event: "error", data: any): this;
     emit(event: "close", data: any): this;
+    emit(event: "stdout", data: any): this;
     emit(event: string | RegExp, ...data: any[]): this;
     on(event: "message", listener: (data: any) => void): this;
     on(event: "start", listener: (data: any) => void): this;
     on(event: "error", listener: (data: any) => void): this;
     on(event: "close", listener: (data: any) => void): this;
+    on(event: "stdout", listener: (data: any) => void): this;
     on(event: string | RegExp, listener: Function): this;
     addListener(event: string | RegExp, listener: Function): this;
 }
 
-class Spawned extends Readable {
+class Spawned extends EventEmitter {
     protected socket : SocketIOClient.Socket;
     protected token: string;
     constructor(socket : SocketIOClient.Socket, token : string) {
@@ -24,7 +25,7 @@ class Spawned extends Readable {
         this.socket = socket;
         this.token = token;
         this.socket.on("spawn_data", ({data} : {data : any}) => {
-            this.push(data);
+            this.emit("stdout", new Uint8Array(data));
         });
         this.socket.on("spawn_close", ({status} : {status : number}) => {
             this.emit("close", status);
@@ -40,8 +41,8 @@ class Spawned extends Readable {
         });
     }
     async waitStart() {
-        return new Promise(solve => {
-                this.socket.once("spawn_start", ({status, err} : {status : any, err : any}) => {
+        return new Promise<void>(solve => {
+            this.socket.once("spawn_start", ({status, err} : {status : any, err : any}) => {
                 if(status !== 200)
                     throw err;
                 else
