@@ -47,9 +47,9 @@ class Spawned extends EventEmitter {
     }
     async waitStart() {
         return new Promise<void>(solve => {
-            this.socket.once("spawn_start", ({status, err} : {status : any, err : any}) => {
-                if(status !== 200)
-                    throw err;
+            this.socket.once("spawn_start", (message : {status : any, err : any}) => {
+                if(message.status !== 200)
+                    throw message;
                 else
                     solve();
             })
