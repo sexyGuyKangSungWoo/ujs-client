@@ -7,12 +7,14 @@ declare interface Spawned extends EventEmitter {
     emit(event: "error", data: any): this;
     emit(event: "close", data: any): this;
     emit(event: "stdout", data: any): this;
+    emit(event: "stderr", data: any): this;
     emit(event: string | RegExp, ...data: any[]): this;
     on(event: "message", listener: (data: any) => void): this;
     on(event: "start", listener: (data: any) => void): this;
     on(event: "error", listener: (data: any) => void): this;
     on(event: "close", listener: (data: any) => void): this;
     on(event: "stdout", listener: (data: any) => void): this;
+    on(event: "stderr", listener: (data: any) => void): this;
     on(event: string | RegExp, listener: Function): this;
     addListener(event: string | RegExp, listener: Function): this;
 }
@@ -25,10 +27,10 @@ class Spawned extends EventEmitter {
         this.socket = socket;
         this.token = token;
         this.socket.on("spawn_stdout", ({data} : {data : any}) => {
-            this.emit("stdout", new Uint8Array(data));
+            this.emit("stdout", data);
         });
         this.socket.on("spawn_stderr", ({data} : {data : any}) => {
-            this.emit("stderr", new Uint8Array(data));
+            this.emit("stderr", data);
         });
         this.socket.on("spawn_close", ({status} : {status : number}) => {
             this.emit("close", status);
@@ -53,7 +55,7 @@ class Spawned extends EventEmitter {
             })
         });
     }
-    message(message : any) {
+    sendMessage(message : any) {
         this.socket.emit("spawn_message", {
             jwt: "jwt " + this.token,
             message
