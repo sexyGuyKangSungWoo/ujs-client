@@ -24,8 +24,11 @@ class Spawned extends EventEmitter {
         super();
         this.socket = socket;
         this.token = token;
-        this.socket.on("spawn_data", ({data} : {data : any}) => {
+        this.socket.on("spawn_stdout", ({data} : {data : any}) => {
             this.emit("stdout", new Uint8Array(data));
+        });
+        this.socket.on("spawn_stderr", ({data} : {data : any}) => {
+            this.emit("stderr", new Uint8Array(data));
         });
         this.socket.on("spawn_close", ({status} : {status : number}) => {
             this.emit("close", status);
